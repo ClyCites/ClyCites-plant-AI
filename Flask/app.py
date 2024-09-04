@@ -12,23 +12,21 @@ from utils import disease_dic
 from model import predict_image
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Replace with a real secret key
+app.secret_key = 'your_secret_key' 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
-csrf = CSRFProtect(app)  # Initialize CSRF protection
+csrf = CSRFProtect(app) 
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
 
-# Define a function to create database tables
 def create_tables():
     with app.app_context():
         db.create_all()
 
-# Call the function to create database tables
 create_tables()
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -59,22 +57,20 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html',csrf_token=csrf_token)
 
-@app.route('/logout', methods=['POST'])  # Adjusted to handle POST method
+@app.route('/logout', methods=['POST'])  
 def logout():
     if request.method == 'POST':
         session.pop('loggedin', None)
-        session.pop('username', None)  # Remove username from session
+        session.pop('username', None)  
         return redirect(url_for('login'))
-    # Redirect to login if logout route is accessed via GET method
     return redirect(url_for('login'))
 
 @app.route('/', methods=['GET'])
 def home():
     if not session.get('loggedin'):
-        # Redirect to login if not logged in
+        
         return redirect(url_for('login'))
     
-    # Generate CSRF token
     csrf_token = generate_csrf()
     
     return render_template('index.html', csrf_token=csrf_token, username=session.get('username'))
